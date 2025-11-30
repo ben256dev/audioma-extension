@@ -5,6 +5,10 @@ let subText = ""
 let styleEl = null
 let playingListenerAdded = false
 let audiomaEnabled = true
+let autoSlowTimeout = null
+let isAutoSlow = false
+let userPaused = false
+let lastPlaybackRate = 1
 
 function ensureStyle() {
     if (!styleEl) {
@@ -33,10 +37,28 @@ function findVideo() {
 
     if (video && !playingListenerAdded) {
         playingListenerAdded = true
+
         video.addEventListener("playing", () => {
             if (!audiomaEnabled) return
-            hideSubs()
+            userPaused = false
+            if (!isAutoSlow) hideSubs()
             console.log("Video is playing, hiding subtitles via CSS")
+        })
+
+        video.addEventListener("pause", () => {
+            userPaused = true
+            if (autoSlowTimeout) {
+                clearTimeout(autoSlowTimeout)
+                autoSlowTimeout = null
+            }
+            if (isAutoSlow) {
+                video.playbackRate = lastPlaybackRate || 1
+                isAutoSlow = false
+            }
+        })
+
+        video.addEventListener("play", () => {
+            userPaused = false
         })
     }
 }
@@ -51,9 +73,39 @@ function handleMutation() {
     if (subTextNew[0] === "[" && subTextNew[subTextNew.length - 1] === "]") return
 
     subText = subTextNew
+    if (video.paused || userPaused) return
+
     console.log("New subtitle:", subText)
     showSubs()
-    video.pause()
+
+    if (autoSlowTimeout) {
+        clearTimeout(autoSlowTimeout)
+        autoSlowTimeout = null
+    }
+
+    if (!isAutoSlow) {
+        lastPlaybackRate = video.playbackRate || 1
+        video.playbackRate = 0.0
+        isAutoSlow = true
+    }
+
+    const length = subText.length
+    const perCharMs = 23
+    const minMs = 0
+    const maxMs = 4000
+    let delay = length * perCharMs
+    if (delay < minMs) delay = minMs
+    if (delay > maxMs) delay = maxMs
+
+    autoSlowTimeout = setTimeout(() => {
+        autoSlowTimeout = null
+        if (!video) return
+        if (userPaused) return
+        if (!isAutoSlow) return
+        hideSubs()
+        video.playbackRate = lastPlaybackRate || 1
+        isAutoSlow = false
+    }, delay)
 }
 
 function setupObserver() {
