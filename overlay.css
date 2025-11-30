@@ -3,9 +3,7 @@
     bottom: 24px;
     right: 24px;
     z-index: 999999;
-    padding: 8px;
-    background: rgba(0, 0, 0, 0.7);
-    border-radius: 6px;
+    transition: opacity 0.25s ease;
 }
 
 #audioma-toggle {
