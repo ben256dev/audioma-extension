@@ -4,6 +4,7 @@ let observer = null
 let subText = ""
 let styleEl = null
 let playingListenerAdded = false
+let audiomaEnabled = true
 
 function ensureStyle() {
     if (!styleEl) {
@@ -33,6 +34,7 @@ function findVideo() {
     if (video && !playingListenerAdded) {
         playingListenerAdded = true
         video.addEventListener("playing", () => {
+            if (!audiomaEnabled) return
             hideSubs()
             console.log("Video is playing, hiding subtitles via CSS")
         })
@@ -41,6 +43,7 @@ function findVideo() {
 
 function handleMutation() {
     if (!subContainer || !video) return
+    if (!audiomaEnabled) return
 
     const subTextNew = (subContainer.innerText || "").trim()
     if (subTextNew === subText) return
@@ -96,3 +99,4 @@ if (document.readyState === "loading") {
 }
 
 tick()
+

@@ -1,13 +1,22 @@
 {
     "manifest_version": 3,
-    "name": "Netflix Subtitle Pauser",
+    "name": "Audioma",
     "version": "0.1",
-    "description": "Pause on each new Netflix subtitle, then resume and hide it.",
+    "description": "Primed listening for Netflix.",
+    "permissions": [
+        "storage"
+    ],
+    "action": {
+        "default_popup": "popup/popup.html",
+        "default_title": "Subtitle helper"
+    },
     "content_scripts": [
         {
             "matches": ["*://www.netflix.com/*"],
-            "js": ["content.js"],
+            "js": ["content.js", "overlay.js"],
+            "css": ["overlay.css"],
             "run_at": "document_idle"
         }
     ]
 }
+
