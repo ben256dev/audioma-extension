@@ -4,6 +4,10 @@ let observer = null
 let subText = ""
 let styleEl = null
 let playingListenerAdded = false
+let autoPauseTimeout = null
+let autoPauseTrigger = false
+let autoPauseActive = false
+let userPaused = false
 
 function ensureStyle() {
     if (!styleEl) {
@@ -32,9 +36,31 @@ function findVideo() {
 
     if (video && !playingListenerAdded) {
         playingListenerAdded = true
+
         video.addEventListener("playing", () => {
+            userPaused = false
+            autoPauseActive = false
             hideSubs()
             console.log("Video is playing, hiding subtitles via CSS")
+        })
+
+        video.addEventListener("pause", () => {
+            if (autoPauseTrigger) {
+                autoPauseTrigger = false
+                autoPauseActive = true
+                userPaused = false
+            } else {
+                userPaused = true
+                autoPauseActive = false
+                if (autoPauseTimeout) {
+                    clearTimeout(autoPauseTimeout)
+                    autoPauseTimeout = null
+                }
+            }
+        })
+
+        video.addEventListener("play", () => {
+            userPaused = false
         })
     }
 }
@@ -48,9 +74,37 @@ function handleMutation() {
     if (subTextNew[0] === "[" && subTextNew[subTextNew.length - 1] === "]") return
 
     subText = subTextNew
+    if (video.paused || userPaused) return
+
     console.log("New subtitle:", subText)
     showSubs()
+
+    if (autoPauseTimeout) {
+        clearTimeout(autoPauseTimeout)
+        autoPauseTimeout = null
+    }
+
+    autoPauseTrigger = true
     video.pause()
+
+    const length = subText.length
+    const perCharMs = 23
+    const minMs = 0
+    const maxMs = 4000
+    let delay = length * perCharMs
+    if (delay < minMs) delay = minMs
+    if (delay > maxMs) delay = maxMs
+
+    autoPauseTimeout = setTimeout(() => {
+        autoPauseTimeout = null
+        if (!video) return
+        if (!autoPauseActive) return
+        if (userPaused) return
+        if (!video.paused) return
+        hideSubs()
+        video.play()
+        autoPauseActive = false
+    }, delay)
 }
 
 function setupObserver() {
@@ -96,3 +150,4 @@ if (document.readyState === "loading") {
 }
 
 tick()
+
