@@ -6,15 +6,33 @@
     "permissions": [
         "storage"
     ],
+    "icons": {
+        "16": "icons/audioma-16.png",
+        "32": "icons/audioma-32.png",
+        "48": "icons/audioma-48.png",
+        "128": "icons/audioma-128.png"
+    },
     "action": {
+        "default_icon": {
+            "16": "icons/audioma-16.png",
+            "32": "icons/audioma-32.png",
+            "48": "icons/audioma-48.png"
+        },
         "default_popup": "popup/popup.html",
         "default_title": "Subtitle helper"
     },
     "content_scripts": [
         {
-            "matches": ["*://www.netflix.com/*"],
-            "js": ["content.js", "overlay.js"],
-            "css": ["overlay.css"],
+            "matches": [
+                "*://www.netflix.com/*"
+            ],
+            "js": [
+                "content.js",
+                "overlay.js"
+            ],
+            "css": [
+                "overlay.css"
+            ],
             "run_at": "document_idle"
         }
     ]
