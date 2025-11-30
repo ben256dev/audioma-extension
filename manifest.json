@@ -1,0 +1,13 @@
+{
+    "manifest_version": 3,
+    "name": "Netflix Subtitle Pauser",
+    "version": "0.1",
+    "description": "Pause on each new Netflix subtitle, then resume and hide it.",
+    "content_scripts": [
+        {
+            "matches": ["*://www.netflix.com/*"],
+            "js": ["content.js"],
+            "run_at": "document_idle"
+        }
+    ]
+}
