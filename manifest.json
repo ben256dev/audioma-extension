@@ -35,6 +35,19 @@
             ],
             "run_at": "document_idle"
         }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "icons/audioma-16.png",
+                "icons/audioma-32.png",
+                "icons/audioma-48.png",
+                "icons/audioma-128.png"
+            ],
+            "matches": [
+                "*://*/*"
+            ]
+        }
     ]
 }
 

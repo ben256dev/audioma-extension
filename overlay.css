@@ -1,18 +1,163 @@
 #audioma-overlay {
     position: fixed;
-    bottom: 24px;
-    right: 24px;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
     z-index: 999999;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    opacity: 0;
+    pointer-events: none;
     transition: opacity 0.25s ease;
 }
 
-#audioma-toggle {
-    padding: 4px 10px;
-    font-size: 12px;
-    color: #ffffff;
-    background: #e50914;
-    border: none;
-    border-radius: 4px;
+#audioma-icon-wrapper {
+    margin-left: 8px;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
+    transition: opacity 0.15s ease;
+    position: absolute;
+}
+
+#audioma-icon-bg {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease;
+}
+
+#audioma-icon-wrapper:hover #audioma-icon-bg {
+    transform: scale(1.06);
+}
+
+#audioma-icon-img {
+    max-width: 72%;
+    max-height: 72%;
+    display: block;
+}
+
+#audioma-panel {
+    margin-left: 0;
+    padding: 10px 14px;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(12px);
+    color: #ffffff;
+    border-radius: 0 12px 12px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    transform: translateX(-200%);
+    transition: transform 0.25s ease-out;
+    min-width: 210px;
+}
+
+#audioma-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+#audioma-panel-label {
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+#audioma-panel-close {
+    font-size: 14px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: none;
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    cursor: pointer;
+}
+
+#audioma-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+#audioma-pause-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+#audioma-toggle-label,
+#audioma-pause-label {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+#audioma-panel-toggle {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: none;
+    background: #e50914;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+#audioma-pause-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+#audioma-pause-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+}
+
+#audioma-pause-dec,
+#audioma-pause-inc {
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    border: none;
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+}
+
+#audioma-pause-input {
+    width: 44px;
+    padding: 0;
+    border-radius: 6px;
+    border: none;
+    background: rgba(0, 0, 0, 0.4);
+    color: #ffffff;
+    font-size: 14px;
+    text-align: center;
+    outline: none;
+    -moz-appearance: textfield;
+    margin: 0;
+}
+
+#audioma-pause-input::-webkit-outer-spin-button,
+#audioma-pause-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
