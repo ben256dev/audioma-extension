@@ -6,39 +6,39 @@ let panelToggleBtn = null
 let pauseInput = null
 let hideTimeout = null
 let isPanelOpen = false
-let pauseCoeff = 1.0
+let overlayPauseMsPerChar = 23
+let overlayPrimedEnabled = true
 const OVERLAY_TIMEOUT_MS = 2500
-
-function ensureAudiomaFlag() {
-    if (typeof audiomaEnabled === "undefined") {
-        audiomaEnabled = true
-    }
-}
 
 function hasVideo() {
     return !!document.querySelector("video")
 }
 
-function updatePanelToggleText() {
-    ensureAudiomaFlag()
-    if (!panelToggleBtn) return
-    panelToggleBtn.textContent = audiomaEnabled ? "Audioma: On" : "Audioma: Off"
-}
-
-function clampPauseCoeff(v) {
-    if (v < 0.25) return 0.25
-    if (v > 4) return 4
+function clampPauseMs(v) {
+    if (!Number.isFinite(v)) return overlayPauseMsPerChar
+    v = Math.round(v)
+    if (v < 1) return 1
+    if (v > 200) return 200
     return v
 }
 
 function updatePauseInput() {
     if (!pauseInput) return
-    pauseCoeff = clampPauseCoeff(pauseCoeff)
-    pauseInput.value = pauseCoeff.toFixed(2)
+    overlayPauseMsPerChar = clampPauseMs(overlayPauseMsPerChar)
+    pauseInput.value = String(overlayPauseMsPerChar) + " ms"
 }
 
-function savePauseCoeff() {
-    browser.storage.local.set({ pauseCoeff })
+function savePauseMs() {
+    browser.storage.local.set({ pauseMsPerChar: overlayPauseMsPerChar })
+}
+
+function updatePanelToggleText() {
+    if (!panelToggleBtn) return
+    panelToggleBtn.textContent = overlayPrimedEnabled ? "On" : "Off"
+}
+
+function savePrimedListening() {
+    browser.storage.local.set({ primedListeningEnabled: overlayPrimedEnabled })
 }
 
 function closePanel() {
@@ -152,8 +152,21 @@ function createOverlay() {
 
     const panelLabel = document.createElement("div")
     panelLabel.id = "audioma-panel-label"
-    panelLabel.textContent = "Audioma"
+    panelLabel.textContent = "Audioma Extension Settings"
     panelHeader.appendChild(panelLabel)
+
+    const toggleRow = document.createElement("div")
+    toggleRow.id = "audioma-toggle-row"
+    panel.appendChild(toggleRow)
+
+    const toggleLabel = document.createElement("span")
+    toggleLabel.id = "audioma-toggle-label"
+    toggleLabel.textContent = "Primed Listening"
+    toggleRow.appendChild(toggleLabel)
+
+    panelToggleBtn = document.createElement("button")
+    panelToggleBtn.id = "audioma-panel-toggle"
+    toggleRow.appendChild(panelToggleBtn)
 
     const pauseRow = document.createElement("div")
     pauseRow.id = "audioma-pause-row"
@@ -161,7 +174,7 @@ function createOverlay() {
 
     const pauseLabel = document.createElement("span")
     pauseLabel.id = "audioma-pause-label"
-    pauseLabel.textContent = "Pause amount"
+    pauseLabel.textContent = "Pause Amount"
     pauseRow.appendChild(pauseLabel)
 
     const pauseWrapper = document.createElement("div")
@@ -179,10 +192,7 @@ function createOverlay() {
 
     pauseInput = document.createElement("input")
     pauseInput.id = "audioma-pause-input"
-    pauseInput.type = "number"
-    pauseInput.step = "0.1"
-    pauseInput.min = "0.25"
-    pauseInput.max = "4"
+    pauseInput.type = "text"
     pauseControls.appendChild(pauseInput)
 
     const pauseInc = document.createElement("button")
@@ -190,45 +200,33 @@ function createOverlay() {
     pauseInc.textContent = "+"
     pauseControls.appendChild(pauseInc)
 
-    const toggleRow = document.createElement("div")
-    toggleRow.id = "audioma-toggle-row"
-    panel.appendChild(toggleRow)
-
-    const toggleLabel = document.createElement("span")
-    toggleLabel.id = "audioma-toggle-label"
-    toggleLabel.textContent = "Toggle"
-    toggleRow.appendChild(toggleLabel)
-
-    panelToggleBtn = document.createElement("button")
-    panelToggleBtn.id = "audioma-panel-toggle"
-    toggleRow.appendChild(panelToggleBtn)
-
     panelToggleBtn.addEventListener("click", () => {
-        ensureAudiomaFlag()
-        audiomaEnabled = !audiomaEnabled
-        browser.storage.local.set({ audiomaEnabled })
+        overlayPrimedEnabled = !overlayPrimedEnabled
+        savePrimedListening()
         updatePanelToggleText()
     })
 
     pauseDec.addEventListener("click", () => {
-        pauseCoeff = clampPauseCoeff(pauseCoeff - 0.1)
+        overlayPauseMsPerChar = clampPauseMs(overlayPauseMsPerChar - 1)
         updatePauseInput()
-        savePauseCoeff()
+        savePauseMs()
     })
 
     pauseInc.addEventListener("click", () => {
-        pauseCoeff = clampPauseCoeff(pauseCoeff + 0.1)
+        overlayPauseMsPerChar = clampPauseMs(overlayPauseMsPerChar + 1)
         updatePauseInput()
-        savePauseCoeff()
+        savePauseMs()
     })
 
     pauseInput.addEventListener("change", () => {
-        const v = parseFloat(pauseInput.value)
-        if (Number.isFinite(v)) {
-            pauseCoeff = clampPauseCoeff(v)
+        const text = pauseInput.value || ""
+        const m = text.match(/\d+/)
+        if (m) {
+            const v = parseInt(m[0], 10)
+            overlayPauseMsPerChar = clampPauseMs(v)
         }
         updatePauseInput()
-        savePauseCoeff()
+        savePauseMs()
     })
 
     overlayContainer.style.opacity = "0"
@@ -236,12 +234,12 @@ function createOverlay() {
 
     attachOverlayToFullscreenRoot()
 
-    browser.storage.local.get(["audiomaEnabled", "pauseCoeff"]).then(result => {
-        if (typeof result.audiomaEnabled === "boolean") {
-            audiomaEnabled = result.audiomaEnabled
+    browser.storage.local.get(["pauseMsPerChar", "primedListeningEnabled"]).then(result => {
+        if (typeof result.pauseMsPerChar === "number") {
+            overlayPauseMsPerChar = clampPauseMs(result.pauseMsPerChar)
         }
-        if (typeof result.pauseCoeff === "number") {
-            pauseCoeff = clampPauseCoeff(result.pauseCoeff)
+        if (typeof result.primedListeningEnabled === "boolean") {
+            overlayPrimedEnabled = result.primedListeningEnabled
         }
         updatePanelToggleText()
         updatePauseInput()

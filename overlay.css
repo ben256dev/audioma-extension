@@ -66,6 +66,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 2px 0 7px;
     gap: 8px;
 }
 
@@ -107,12 +108,15 @@
 
 #audioma-panel-toggle {
     font-size: 12px;
-    padding: 4px 10px;
+    padding: auto;
     border-radius: 999px;
     border: none;
     background: #e50914;
     color: #ffffff;
     cursor: pointer;
+    width: 80px;
+    text-align: center;
+    line-height: 20px;
 }
 
 #audioma-pause-wrapper {
@@ -148,7 +152,7 @@
     border: none;
     background: rgba(0, 0, 0, 0.4);
     color: #ffffff;
-    font-size: 14px;
+    font-size: 13px;
     text-align: center;
     outline: none;
     -moz-appearance: textfield;

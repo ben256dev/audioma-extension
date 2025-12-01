@@ -4,11 +4,12 @@ let observer = null
 let subText = ""
 let styleEl = null
 let playingListenerAdded = false
-let audiomaEnabled = true
 let autoSlowTimeout = null
 let isAutoSlow = false
 let userPaused = false
 let lastPlaybackRate = 1
+let pauseMsPerChar = 23
+let primedListeningEnabled = true
 
 function ensureStyle() {
     if (!styleEl) {
@@ -28,6 +29,11 @@ function hideSubs() {
     styleEl.textContent = ".player-timedtext { opacity: 0 !important; }"
 }
 
+function resetSubsStyle() {
+    if (!styleEl) return
+    styleEl.textContent = ""
+}
+
 function findVideo() {
     if (video && !video.closest("body")) video = null
     if (!video) {
@@ -39,10 +45,13 @@ function findVideo() {
         playingListenerAdded = true
 
         video.addEventListener("playing", () => {
-            if (!audiomaEnabled) return
             userPaused = false
+            if (!primedListeningEnabled) {
+                resetSubsStyle()
+                return
+            }
             if (!isAutoSlow) hideSubs()
-            console.log("Video is playing, hiding subtitles via CSS")
+            console.log("Audioma: video playing, hiding subtitles via CSS")
         })
 
         video.addEventListener("pause", () => {
@@ -65,7 +74,7 @@ function findVideo() {
 
 function handleMutation() {
     if (!subContainer || !video) return
-    if (!audiomaEnabled) return
+    if (!primedListeningEnabled) return
 
     const subTextNew = (subContainer.innerText || "").trim()
     if (subTextNew === subText) return
@@ -75,7 +84,7 @@ function handleMutation() {
     subText = subTextNew
     if (video.paused || userPaused) return
 
-    console.log("New subtitle:", subText)
+    console.log("Audioma: new subtitle:", subText)
     showSubs()
 
     if (autoSlowTimeout) {
@@ -90,10 +99,9 @@ function handleMutation() {
     }
 
     const length = subText.length
-    const perCharMs = 23
     const minMs = 0
     const maxMs = 4000
-    let delay = length * perCharMs
+    let delay = length * pauseMsPerChar
     if (delay < minMs) delay = minMs
     if (delay > maxMs) delay = maxMs
 
@@ -134,6 +142,35 @@ function findSubContainer() {
     }
 }
 
+function loadSettingsFromStorage() {
+    if (!browser || !browser.storage || !browser.storage.local) return
+
+    browser.storage.local.get(["pauseMsPerChar", "primedListeningEnabled"]).then(result => {
+        if (typeof result.pauseMsPerChar === "number") {
+            pauseMsPerChar = result.pauseMsPerChar
+            console.log("Audioma pauseMsPerChar loaded:", pauseMsPerChar)
+        }
+        if (typeof result.primedListeningEnabled === "boolean") {
+            primedListeningEnabled = result.primedListeningEnabled
+            console.log("Audioma primedListeningEnabled loaded:", primedListeningEnabled)
+            if (!primedListeningEnabled) resetSubsStyle()
+        }
+    })
+
+    browser.storage.onChanged.addListener((changes, area) => {
+        if (area !== "local") return
+        if (changes.pauseMsPerChar && typeof changes.pauseMsPerChar.newValue === "number") {
+            pauseMsPerChar = changes.pauseMsPerChar.newValue
+            console.log("Audioma pauseMsPerChar updated:", pauseMsPerChar)
+        }
+        if (changes.primedListeningEnabled && typeof changes.primedListeningEnabled.newValue === "boolean") {
+            primedListeningEnabled = changes.primedListeningEnabled.newValue
+            console.log("Audioma primedListeningEnabled updated:", primedListeningEnabled)
+            if (!primedListeningEnabled) resetSubsStyle()
+        }
+    })
+}
+
 function tick() {
     findVideo()
     findSubContainer()
@@ -142,6 +179,7 @@ function tick() {
 
 function init() {
     findVideo()
+    loadSettingsFromStorage()
 }
 
 if (document.readyState === "loading") {
