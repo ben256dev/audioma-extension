@@ -10,6 +10,8 @@ let overlayPauseMsPerChar = 23
 let overlayPrimedEnabled = true
 const OVERLAY_TIMEOUT_MS = 2500
 
+const ext = globalThis.browser ?? globalThis.chrome
+
 function hasVideo() {
     return !!document.querySelector("video")
 }
@@ -29,7 +31,7 @@ function updatePauseInput() {
 }
 
 function savePauseMs() {
-    browser.storage.local.set({ pauseMsPerChar: overlayPauseMsPerChar })
+    ext.storage.local.set({ pauseMsPerChar: overlayPauseMsPerChar })
 }
 
 function updatePanelToggleText() {
@@ -38,7 +40,7 @@ function updatePanelToggleText() {
 }
 
 function savePrimedListening() {
-    browser.storage.local.set({ primedListeningEnabled: overlayPrimedEnabled })
+    ext.storage.local.set({ primedListeningEnabled: overlayPrimedEnabled })
 }
 
 function closePanel() {
@@ -131,7 +133,7 @@ function createOverlay() {
     const iconImg = document.createElement("img")
     iconImg.id = "audioma-icon-img"
     try {
-        iconImg.src = browser.runtime.getURL("icons/audioma-48.png")
+        iconImg.src = ext.runtime.getURL("icons/audioma-48.png")
     } catch (e) {
         iconImg.src = "icons/audioma-48.png"
     }
@@ -234,16 +236,27 @@ function createOverlay() {
 
     attachOverlayToFullscreenRoot()
 
-    browser.storage.local.get(["pauseMsPerChar", "primedListeningEnabled"]).then(result => {
-        if (typeof result.pauseMsPerChar === "number") {
-            overlayPauseMsPerChar = clampPauseMs(result.pauseMsPerChar)
+    try {
+        const keys = ["pauseMsPerChar", "primedListeningEnabled"]
+    
+        const apply = (result = {}) => {
+            if (typeof result.pauseMsPerChar === "number") {
+                overlayPauseMsPerChar = clampPauseMs(result.pauseMsPerChar)
+            }
+            if (typeof result.primedListeningEnabled === "boolean") {
+                overlayPrimedEnabled = result.primedListeningEnabled
+            }
+            updatePanelToggleText()
+            updatePauseInput()
         }
-        if (typeof result.primedListeningEnabled === "boolean") {
-            overlayPrimedEnabled = result.primedListeningEnabled
+    
+        const maybePromise = ext.storage.local.get(keys, apply)
+    
+        if (maybePromise && typeof maybePromise.then === "function") {
+            maybePromise.then(apply)
         }
-        updatePanelToggleText()
-        updatePauseInput()
-    })
+    } catch (_) {
+    }
 
     attachActivityListeners()
 

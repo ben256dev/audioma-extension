@@ -143,9 +143,14 @@ function findSubContainer() {
 }
 
 function loadSettingsFromStorage() {
-    if (!browser || !browser.storage || !browser.storage.local) return
+    const ext =
+        (typeof browser !== "undefined" && browser) ? browser :
+        (typeof chrome !== "undefined" && chrome) ? chrome :
+        null
 
-    browser.storage.local.get(["pauseMsPerChar", "primedListeningEnabled"]).then(result => {
+    if (!ext || !ext.storage || !ext.storage.local) return
+
+    const apply = (result = {}) => {
         if (typeof result.pauseMsPerChar === "number") {
             pauseMsPerChar = result.pauseMsPerChar
             console.log("Audioma pauseMsPerChar loaded:", pauseMsPerChar)
@@ -155,10 +160,23 @@ function loadSettingsFromStorage() {
             console.log("Audioma primedListeningEnabled loaded:", primedListeningEnabled)
             if (!primedListeningEnabled) resetSubsStyle()
         }
-    })
+    }
 
-    browser.storage.onChanged.addListener((changes, area) => {
-        if (area !== "local") return
+    try {
+        const maybePromise = ext.storage.local.get(
+            ["pauseMsPerChar", "primedListeningEnabled"],
+            apply
+        )
+
+        if (maybePromise && typeof maybePromise.then === "function") {
+            maybePromise.then(apply)
+        }
+    } catch (_) {
+    }
+
+    ext.storage.onChanged.addListener((changes, areaName) => {
+        if (areaName !== "local") return
+
         if (changes.pauseMsPerChar && typeof changes.pauseMsPerChar.newValue === "number") {
             pauseMsPerChar = changes.pauseMsPerChar.newValue
             console.log("Audioma pauseMsPerChar updated:", pauseMsPerChar)
