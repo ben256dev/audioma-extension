@@ -9,6 +9,7 @@ let isAutoSlow = false
 let userPaused = false
 let lastPlaybackRate = 1
 let pauseMsPerChar = 23
+let minMs = 0
 let primedListeningEnabled = true
 
 function ensureStyle() {
@@ -99,7 +100,6 @@ function handleMutation() {
     }
 
     const length = subText.length
-    const minMs = 0
     const maxMs = 4000
     let delay = length * pauseMsPerChar
     if (delay < minMs) delay = minMs
@@ -151,6 +151,10 @@ function loadSettingsFromStorage() {
     if (!ext || !ext.storage || !ext.storage.local) return
 
     const apply = (result = {}) => {
+        if (typeof result.minMs === "number") {
+            minMs = result.minMs
+            console.log("Audioma minMs loaded:", minMs)
+        }
         if (typeof result.pauseMsPerChar === "number") {
             pauseMsPerChar = result.pauseMsPerChar
             console.log("Audioma pauseMsPerChar loaded:", pauseMsPerChar)
@@ -164,7 +168,7 @@ function loadSettingsFromStorage() {
 
     try {
         const maybePromise = ext.storage.local.get(
-            ["pauseMsPerChar", "primedListeningEnabled"],
+            ["pauseMsPerChar", "minMs", "primedListeningEnabled"],
             apply
         )
 
@@ -177,6 +181,10 @@ function loadSettingsFromStorage() {
     ext.storage.onChanged.addListener((changes, areaName) => {
         if (areaName !== "local") return
 
+        if (changes.minMs && typeof changes.minMs.newValue === "number") {
+            minMs = changes.minMs.newValue
+            console.log("Audioma minMs updated:", minMs)
+        }
         if (changes.pauseMsPerChar && typeof changes.pauseMsPerChar.newValue === "number") {
             pauseMsPerChar = changes.pauseMsPerChar.newValue
             console.log("Audioma pauseMsPerChar updated:", pauseMsPerChar)

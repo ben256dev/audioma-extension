@@ -1,4 +1,4 @@
-#audioma-overlay {
+.audioma-overlay {
     position: fixed;
     top: 50%;
     left: 0;
@@ -12,7 +12,17 @@
     transition: opacity 0.25s ease;
 }
 
-#audioma-icon-wrapper {
+.audioma-overlay-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.audioma-overlay-hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.audioma-icon-wrapper {
     margin-left: 8px;
     width: 64px;
     height: 64px;
@@ -24,7 +34,7 @@
     position: absolute;
 }
 
-#audioma-icon-bg {
+.audioma-icon-bg {
     width: 64px;
     height: 64px;
     border-radius: 50%;
@@ -36,17 +46,17 @@
     transition: transform 0.15s ease;
 }
 
-#audioma-icon-wrapper:hover #audioma-icon-bg {
+.audioma-icon-wrapper:hover .audioma-icon-bg {
     transform: scale(1.06);
 }
 
-#audioma-icon-img {
+.audioma-icon-img {
     max-width: 72%;
     max-height: 72%;
     display: block;
 }
 
-#audioma-panel {
+.audioma-panel {
     margin-left: 0;
     padding: 10px 14px;
     background: rgba(0, 0, 0, 0.65);
@@ -62,7 +72,11 @@
     min-width: 210px;
 }
 
-#audioma-panel-header {
+.audioma-panel-open {
+    transform: translateX(0);
+}
+
+.audioma-panel-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -70,43 +84,25 @@
     gap: 8px;
 }
 
-#audioma-panel-label {
+.audioma-panel-label {
     font-size: 14px;
     font-weight: 500;
     white-space: nowrap;
 }
 
-#audioma-panel-close {
-    font-size: 14px;
-    padding: 2px 8px;
-    border-radius: 999px;
-    border: none;
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-    cursor: pointer;
-}
-
-#audioma-toggle-row {
+.audioma-setting-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
 }
 
-#audioma-pause-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
-}
-
-#audioma-toggle-label,
-#audioma-pause-label {
+.audioma-setting-label {
     font-size: 12px;
     opacity: 0.9;
 }
 
-#audioma-panel-toggle {
+.audioma-toggle-btn {
     font-size: 12px;
     padding: auto;
     border-radius: 999px;
@@ -119,19 +115,18 @@
     line-height: 20px;
 }
 
-#audioma-pause-wrapper {
+.audioma-setting-wrapper {
     display: flex;
     align-items: center;
 }
 
-#audioma-pause-controls {
+.audioma-setting-controls {
     display: inline-flex;
     align-items: center;
     gap: 0;
 }
 
-#audioma-pause-dec,
-#audioma-pause-inc {
+.audioma-setting-btn {
     width: 20px;
     height: 20px;
     border-radius: 999px;
@@ -145,7 +140,7 @@
     padding: 0;
 }
 
-#audioma-pause-input {
+.audioma-setting-input {
     width: 44px;
     padding: 0;
     border-radius: 6px;
@@ -159,9 +154,19 @@
     margin: 0;
 }
 
-#audioma-pause-input::-webkit-outer-spin-button,
-#audioma-pause-input::-webkit-inner-spin-button {
+.audioma-setting-input::-webkit-outer-spin-button,
+.audioma-setting-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+
+.audioma-hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.audioma-clickable {
+    opacity: 1;
+    pointer-events: auto;
 }
 
