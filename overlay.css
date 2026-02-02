@@ -1,19 +1,15 @@
 .audioma-overlay {
-    position: absolute;
+    position: fixed;
     top: 50%;
     left: 0;
     transform: translateY(-50%);
-    z-index: 100;
+    z-index: 999999;
     display: flex;
     align-items: center;
     gap: 0;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.25s ease;
-}
-
-.audioma-overlay.yt-shorts {
-    left: 39%;
 }
 
 .audioma-overlay-visible {
@@ -72,16 +68,12 @@
     align-items: stretch;
     gap: 8px;
     transform: translateX(-200%);
-    opacity: 0;
-    pointer-events: none;
-    transition: transform 0.25s ease-out, opacity 0.15s ease-out;
+    transition: transform 0.25s ease-out;
     min-width: 210px;
 }
 
 .audioma-panel-open {
     transform: translateX(0);
-    opacity: 1;
-    pointer-events: auto;
 }
 
 .audioma-panel-header {

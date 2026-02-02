@@ -85,49 +85,8 @@ function openPanel() {
     }
 }
 
-function shouldEnableAudioma() {
-    const host = location.hostname
-    const path = location.pathname
-
-    if (host.includes("youtube.com")) {
-        return (
-            path === "/watch" ||
-            path.startsWith("/shorts/")
-        )
-    }
-
-    if (host.includes("netflix.com")) {
-        return (
-            path.startsWith("/watch/")
-        )
-    }
-
-    return false
-}
-
-function isYouTubeShorts() {
-    return (
-        location.hostname.includes("youtube.com") &&
-        location.pathname.startsWith("/shorts/")
-    )
-}
-
-function applyPageClass() {
-    if (!overlayContainer) return
-
-    overlayContainer.classList.remove("yt-shorts")
-
-    if (isYouTubeShorts()) {
-        overlayContainer.classList.add("yt-shorts")
-    }
-}
-
 function showOverlay() {
     if (!overlayContainer) return
-
-    applyPageClass()
-
-    if (!shouldEnableAudioma()) return
     if (!hasVideo()) return
 
     const wasHidden = !overlayContainer.classList.contains("audioma-overlay-visible")

@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Audioma",
-    "version": "0.3.0",
-    "description": "Primed listening for Netflix and YouTube in Chrome and Firefox.",
+    "version": "0.1.0",
+    "description": "Primed listening for Netflix in Chrome and Firefox.",
     "permissions": [
         "storage"
     ],
@@ -23,8 +23,7 @@
     "content_scripts": [
         {
             "matches": [
-                "*://www.netflix.com/*",
-                "*://www.youtube.com/*"
+                "*://www.netflix.com/*"
             ],
             "js": [
                 "content.js",
@@ -44,10 +43,7 @@
                 "icons/audioma-48.png",
                 "icons/audioma-128.png"
             ],
-            "matches": [
-                "*://www.netflix.com/*",
-                "*://www.youtube.com/*"
-            ]
+            "matches": ["*://www.netflix.com/*"]
         }
     ]
 }
