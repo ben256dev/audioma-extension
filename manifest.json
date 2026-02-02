@@ -1,11 +1,21 @@
 {
     "manifest_version": 3,
     "name": "Audioma",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "description": "Primed Listening for YouTube and Netflix in Chrome and Firefox.",
     "permissions": [
         "storage"
     ],
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "{d6962e0c-a6eb-41b6-8209-19811d2777b9}",
+            "data_collection_permissions": {
+                "required": [
+                    "none"
+                ]
+            }
+        }
+    },
     "icons": {
         "16": "icons/audioma-16.png",
         "32": "icons/audioma-32.png",
