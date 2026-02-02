@@ -1,6 +1,6 @@
 # Audioma Extension
 
-## Primed Listening for Netflix in Chrome and Firefox
+## Primed Listening for YouTube and Netflix in Chrome and Firefox
 
 ![Audioma overlay demo](https://shthub.org/u/benjamin/audioma_overlay_demo_0_1_0.gif?raw)
 

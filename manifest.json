@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Audioma",
     "version": "0.3.0",
-    "description": "Primed listening for Netflix and YouTube in Chrome and Firefox.",
+    "description": "Primed Listening for YouTube and Netflix in Chrome and Firefox.",
     "permissions": [
         "storage"
     ],
