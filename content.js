@@ -11,6 +11,7 @@ let lastPlaybackRate = 1
 let pauseMsPerChar = 23
 let minMs = 0
 let primedListeningEnabled = true
+let seenSubtitleOnce = false
 
 function ensureStyle() {
     if (!styleEl) {
@@ -20,14 +21,39 @@ function ensureStyle() {
     }
 }
 
+function getMode() {
+    const host = location.hostname || ""
+    if (host.includes("netflix.com")) return "netflix"
+    if (host.includes("youtube.com")) return "youtube"
+    return "unknown"
+}
+
 function showSubs() {
     ensureStyle()
-    styleEl.textContent = ".player-timedtext { opacity: 1 !important; }"
+    const mode = getMode()
+    if (mode === "netflix") {
+        styleEl.textContent = ".player-timedtext { opacity: 1 !important; }"
+        return
+    }
+    if (mode === "youtube") {
+        styleEl.textContent = ".caption-window, .ytp-caption-window-container, .captions-text { opacity: 1 !important; }"
+        return
+    }
+    styleEl.textContent = ""
 }
 
 function hideSubs() {
     ensureStyle()
-    styleEl.textContent = ".player-timedtext { opacity: 0 !important; }"
+    const mode = getMode()
+    if (mode === "netflix") {
+        styleEl.textContent = ".player-timedtext { opacity: 0 !important; }"
+        return
+    }
+    if (mode === "youtube") {
+        styleEl.textContent = ".caption-window, .ytp-caption-window-container, .captions-text { opacity: 0 !important; }"
+        return
+    }
+    styleEl.textContent = ""
 }
 
 function resetSubsStyle() {
@@ -51,8 +77,22 @@ function findVideo() {
                 resetSubsStyle()
                 return
             }
-            if (!isAutoSlow) hideSubs()
-            console.log("Audioma: video playing, hiding subtitles via CSS")
+
+            const mode = getMode()
+
+            if (mode === "netflix") {
+                if (!isAutoSlow) hideSubs()
+                return
+            }
+
+            if (mode === "youtube") {
+                if (!seenSubtitleOnce) {
+                    resetSubsStyle()
+                    return
+                }
+                if (!isAutoSlow) hideSubs()
+                return
+            }
         })
 
         video.addEventListener("pause", () => {
@@ -73,19 +113,50 @@ function findVideo() {
     }
 }
 
-function handleMutation() {
+function readSubtitleText() {
+    if (!subContainer) return ""
+
+    const mode = getMode()
+
+    if (mode === "netflix") {
+        return (subContainer.innerText || "").trim()
+    }
+
+    if (mode === "youtube") {
+        const segs = subContainer.querySelectorAll(".ytp-caption-segment")
+        if (segs && segs.length > 0) {
+            const parts = []
+            for (const s of segs) {
+                const t = (s.textContent || "").trim()
+                if (t) parts.push(t)
+            }
+            return parts.join("\n").trim()
+        }
+        return (subContainer.innerText || "").trim()
+    }
+
+    return (subContainer.innerText || "").trim()
+}
+
+function shouldIgnoreSubtitleText(t) {
+    if (!t) return true
+    if (t[0] === "[" && t[t.length - 1] === "]") return true
+    return false
+}
+
+function processSubtitleText(subTextNew) {
     if (!subContainer || !video) return
     if (!primedListeningEnabled) return
 
-    const subTextNew = (subContainer.innerText || "").trim()
     if (subTextNew === subText) return
     if (subTextNew === "") return
-    if (subTextNew[0] === "[" && subTextNew[subTextNew.length - 1] === "]") return
+    if (shouldIgnoreSubtitleText(subTextNew)) return
 
     subText = subTextNew
+    seenSubtitleOnce = true
+
     if (video.paused || userPaused) return
 
-    console.log("Audioma: new subtitle:", subText)
     showSubs()
 
     if (autoSlowTimeout) {
@@ -116,6 +187,14 @@ function handleMutation() {
     }, delay)
 }
 
+function handleMutation() {
+    if (!subContainer || !video) return
+    if (!primedListeningEnabled) return
+
+    const subTextNew = readSubtitleText()
+    processSubtitleText(subTextNew)
+}
+
 function setupObserver() {
     if (!subContainer) return
     if (observer) observer.disconnect()
@@ -129,9 +208,23 @@ function setupObserver() {
 }
 
 function findSubContainer() {
-    const el = document.querySelector("div.player-timedtext")
+    const mode = getMode()
+
+    let el = null
+
+    if (mode === "netflix") {
+        el = document.querySelector("div.player-timedtext")
+    } else if (mode === "youtube") {
+        el =
+            document.querySelector("div.caption-window") ||
+            document.querySelector("div.ytp-caption-window-container") ||
+            document.querySelector("span.captions-text")
+    }
+
     if (el !== subContainer) {
         subContainer = el
+        subText = ""
+
         if (observer) {
             observer.disconnect()
             observer = null
@@ -200,6 +293,12 @@ function loadSettingsFromStorage() {
 function tick() {
     findVideo()
     findSubContainer()
+
+    if (getMode() === "youtube" && subContainer && primedListeningEnabled) {
+        const subTextNew = readSubtitleText()
+        processSubtitleText(subTextNew)
+    }
+
     setTimeout(tick, 100)
 }
 
