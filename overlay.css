@@ -12,6 +12,10 @@
     transition: opacity 0.25s ease;
 }
 
+.audioma-overlay.yt-shorts {
+    left: 39%;
+}
+
 .audioma-overlay-visible {
     opacity: 1;
     pointer-events: auto;
@@ -68,12 +72,16 @@
     align-items: stretch;
     gap: 8px;
     transform: translateX(-200%);
-    transition: transform 0.25s ease-out;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.25s ease-out, opacity 0.15s ease-out;
     min-width: 210px;
 }
 
 .audioma-panel-open {
     transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .audioma-panel-header {
