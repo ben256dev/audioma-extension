@@ -23,7 +23,8 @@
     "content_scripts": [
         {
             "matches": [
-                "*://www.netflix.com/*"
+                "*://www.netflix.com/*",
+                "*://www.youtube.com/*"
             ],
             "js": [
                 "content.js",
@@ -43,7 +44,10 @@
                 "icons/audioma-48.png",
                 "icons/audioma-128.png"
             ],
-            "matches": ["*://www.netflix.com/*"]
+            "matches": [
+                "*://www.netflix.com/*",
+                "*://www.youtube.com/*"
+            ]
         }
     ]
 }
